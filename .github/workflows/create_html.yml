@@ -1,0 +1,34 @@
+name: Manual Create HTML
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: '作成するHTMLに含めるURLを入力してください'
+        required: true
+        default: 'https://www.amazon.co.jp/'
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # コミット権限を許可
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create HTML file
+        run: |
+          # 出力ディレクトリ（例: docs）を作成
+          mkdir -p docs
+          # 入力されたURLを含むHTMLを作成
+          echo "<html><body><h1>Generated Link</h1><a href='${{ github.event.inputs.target_url }}'>Click Here</a></body></html>" > docs/index.html
+
+      - name: Commit and Push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/index.html
+          git commit -m "Add generated HTML with URL: ${{ github.event.inputs.target_url }}"
+          git push
